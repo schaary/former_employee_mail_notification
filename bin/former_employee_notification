@@ -1,0 +1,57 @@
+#!/usr/bin/env ruby
+
+require 'ruby-plsql'
+require 'thor'
+require 'awesome_print'
+require 'date'
+require 'active_support/core_ext' 
+
+class FormerEmployeeNotification < Thor
+  desc "fetch","get the list of employee"
+  def fetch
+    list = to_hash fetch_notify_employee_with_enddate
+    ap list.select {|s| }
+  end
+
+private 
+  def fetch_notify_employee_with_enddate
+    connect
+
+    list = {}
+    plsql.mitarbeiter_account_pkg.employeeWithEndDate do |cursor|
+      list = cursor.fetch_all
+    end
+    list
+  end
+
+  def to_hash list
+    list.inject([]) do |new_list, array|
+      new_list.push(
+       {uid: array[0],
+        mail: array[1],
+        firstname: array[2],
+        lastname: array[3],
+        gender: array[4],
+        title: array[5],
+        enddate: array[6]}
+      )
+    end
+  end
+
+  def connect
+    plsql.connection ||= OCI8.new( 
+      ENV.fetch('UMT_USER'), 
+      ENV.fetch('UMT_PASSWORD'), 
+      ENV.fetch('UMT_SID') )
+  end
+
+  def two_months_ago date
+    year = Date.current.month_ago(2).year
+    month = Date.current.month_ago(2).month
+
+    return true if date.year == year && date.month == month
+    return false
+  end
+end
+
+FormerEmployeeNotification.start
