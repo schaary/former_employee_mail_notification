@@ -10,8 +10,10 @@ require 'pry'
 class FormerEmployeeMailNotification < Thor
   desc "refresh","refresh infos about former employee"
   def refresh 
+    initialize_time_slots
     list = to_hash fetch
-    ap list.select { |s| two_months_ago s[:endtime] }
+#    ap list.select { |s| two_months_ago s[:endtime] }
+    binding.pry
   end
 
 private 
@@ -25,6 +27,23 @@ private
     list
   end
 
+  def initialize_time_slots
+    @time_slots = {
+      one:   {start: Time.now.months_ago(1).at_beginning_of_month, 
+              end:   Time.now.months_ago(1).at_end_of_month},
+      two:   {start: Time.now.months_ago(2).at_beginning_of_month, 
+              end:   Time.now.months_ago(2).at_end_of_month},
+      three: {start: Time.now.months_ago(3).at_beginning_of_month, 
+              end:   Time.now.months_ago(3).at_end_of_month},
+      four:  {start: Time.now.months_ago(4).at_beginning_of_month, 
+              end:   Time.now.months_ago(4).at_end_of_month},
+      five:  {start: Time.now.months_ago(5).at_beginning_of_month, 
+              end:   Time.now.months_ago(5).at_end_of_month},
+      six:   {start: Time.now.months_ago(6).at_beginning_of_month, 
+              end:   Time.now.months_ago(6).at_end_of_month},
+    }
+  end
+
   def to_hash list
     list.inject([]) do |new_list, array|
       new_list.push(
@@ -34,9 +53,16 @@ private
         lastname: array[0],
         gender: array[2],
         #title: array[5],
-        endtime: make_date(array[5])}
+        endtime: make_date(array[5]),
+        endtimegroup: select_endtime_group(make_date(array[5]))}
       )
     end
+  end
+
+  def select_endtime_group date
+    return :seven if date.nil?
+
+    @time_slots.select { |k,v| (v[:start]..v[:end]).cover? date }.keys.first
   end
 
   def connect
@@ -44,15 +70,6 @@ private
       ENV.fetch('UMT_USER'), 
       ENV.fetch('UMT_PASSWORD'), 
       ENV.fetch('UMT_SID') )
-  end
-
-  def two_months_ago date
-    return false if date.nil?
-    year = Date.current.months_ago(2).year
-    month = Date.current.months_ago(2).month
-
-    return true if date.year == year && date.month == month
-    return false
   end
 
   def make_date date
