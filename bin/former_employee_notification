@@ -5,20 +5,21 @@ require 'thor'
 require 'awesome_print'
 require 'date'
 require 'active_support/core_ext' 
+require 'pry'
 
-class FormerEmployeeNotification < Thor
-  desc "fetch","get the list of employee"
-  def fetch
-    list = to_hash fetch_notify_employee_with_enddate
-    ap list.select {|s| }
+class FormerEmployeeMailNotification < Thor
+  desc "refresh","refresh infos about former employee"
+  def refresh 
+    list = to_hash fetch
+    ap list.select { |s| two_months_ago s[:endtime] }
   end
 
 private 
-  def fetch_notify_employee_with_enddate
+  def fetch
     connect
 
     list = {}
-    plsql.mitarbeiter_account_pkg.employeeWithEndDate do |cursor|
+    plsql.mitarbeiter_account_pkg.formerEmployeeList do |cursor|
       list = cursor.fetch_all
     end
     list
@@ -27,13 +28,13 @@ private
   def to_hash list
     list.inject([]) do |new_list, array|
       new_list.push(
-       {uid: array[0],
-        mail: array[1],
-        firstname: array[2],
-        lastname: array[3],
-        gender: array[4],
-        title: array[5],
-        enddate: array[6]}
+       {uid: array[3],
+        mail: array[4],
+        firstname: array[1],
+        lastname: array[0],
+        gender: array[2],
+        #title: array[5],
+        endtime: make_date(array[5])}
       )
     end
   end
@@ -46,12 +47,19 @@ private
   end
 
   def two_months_ago date
-    year = Date.current.month_ago(2).year
-    month = Date.current.month_ago(2).month
+    return false if date.nil?
+    year = Date.current.months_ago(2).year
+    month = Date.current.months_ago(2).month
 
     return true if date.year == year && date.month == month
     return false
   end
+
+  def make_date date
+    return nil if date.nil?
+
+    Date.parse date
+  end
 end
 
-FormerEmployeeNotification.start
+FormerEmployeeMailNotification.start
