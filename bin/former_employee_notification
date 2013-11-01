@@ -54,7 +54,7 @@ private
         gender: array[2],
         #title: array[5],
         endtime: make_date(array[5]),
-        endtimegroup: select_endtime_group(make_date(array[5]))}
+        endtime_group: select_endtime_group(make_date(array[5]))}
       )
     end
   end
