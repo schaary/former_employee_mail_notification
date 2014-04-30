@@ -4,7 +4,9 @@ require 'ruby-plsql'
 require 'thor'
 require 'awesome_print'
 require 'date'
-require 'active_support/core_ext' 
+require 'active_support'
+require 'active_support/deprecation'
+require 'active_support/core_ext'
 require 'pry'
 
 class FormerEmployeeMailNotification < Thor
@@ -12,8 +14,20 @@ class FormerEmployeeMailNotification < Thor
   def refresh 
     initialize_time_slots
     list = to_hash fetch
-#    ap list.select { |s| two_months_ago s[:endtime] }
-    binding.pry
+
+    ap list.select{ |record| :one == record[:endtime_group] }.count
+    # list.select{ |record| :one == record[:endtime_group] }.each do |record|
+    #   puts "'#{record[:firstname]}','#{record[:lastname]}'"
+    # end
+
+    ap list.select{ |record| :two == record[:endtime_group] }.count
+    ap list.select{ |record| :three == record[:endtime_group] }.count
+    ap list.select{ |record| :four == record[:endtime_group] }.count
+    ap list.select{ |record| :five == record[:endtime_group] }.count
+    ap list.select{ |record| :six == record[:endtime_group] }.count
+    ap list.select{ |record| :seven == record[:endtime_group] }.count
+
+    ap list.count
   end
 
 private 
