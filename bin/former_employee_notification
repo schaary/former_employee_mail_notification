@@ -15,19 +15,30 @@ class FormerEmployeeMailNotification < Thor
     initialize_time_slots
     list = to_hash fetch
 
-    ap list.select{ |record| :one == record[:endtime_group] }.count
+    one = list.select{ |record| :one == record[:endtime_group] }.count
     # list.select{ |record| :one == record[:endtime_group] }.each do |record|
     #   puts "'#{record[:firstname]}','#{record[:lastname]}'"
     # end
 
-    ap list.select{ |record| :two == record[:endtime_group] }.count
-    ap list.select{ |record| :three == record[:endtime_group] }.count
-    ap list.select{ |record| :four == record[:endtime_group] }.count
-    ap list.select{ |record| :five == record[:endtime_group] }.count
-    ap list.select{ |record| :six == record[:endtime_group] }.count
-    ap list.select{ |record| :seven == record[:endtime_group] }.count
+    two = list.select{ |record| :two == record[:endtime_group] }.count
+    three = list.select{ |record| :three == record[:endtime_group] }.count
+    four = list.select{ |record| :four == record[:endtime_group] }.count
+    five = list.select{ |record| :five == record[:endtime_group] }.count
+    six = list.select{ |record| :six == record[:endtime_group] }.count
+    seven = list.select{ |record| :seven == record[:endtime_group] }.count
+    rest = list.count - (one+two+three+four+five+six)
 
-    ap list.count
+
+    puts ""
+    puts "Gesamtanzahl zu löschender ehem. Mitarbeiter #{list.count}"
+    puts ""
+    puts "Einen Monat:  #{one}"
+    puts "Zwei Monate:  #{two}"
+    puts "Drei Monate:  #{three}"
+    puts "Vier Monate:  #{four}"
+    puts "Fünf Monate:  #{five}"
+    puts "Sechs Monate: #{six}"
+    puts "Sieben oder mehr Monate: #{seven}"
   end
 
 private 
@@ -35,7 +46,7 @@ private
     connect
 
     list = {}
-    plsql.mitarbeiter_account_pkg.formerEmployeeList do |cursor|
+    plsql.mitarbeiter_account_pkg.expiredUserList do |cursor|
       list = cursor.fetch_all
     end
     list
