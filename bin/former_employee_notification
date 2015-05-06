@@ -15,17 +15,17 @@ class FormerEmployeeMailNotification < Thor
     initialize_time_slots
     list = to_hash fetch
 
-    one = list.select{ |record| :one == record[:endtime_group] }.count
     # list.select{ |record| :one == record[:endtime_group] }.each do |record|
     #   puts "'#{record[:firstname]}','#{record[:lastname]}'"
     # end
 
+    one = list.select{ |record| :one == record[:endtime_group] }.count
     two = list.select{ |record| :two == record[:endtime_group] }.count
     three = list.select{ |record| :three == record[:endtime_group] }.count
     four = list.select{ |record| :four == record[:endtime_group] }.count
     five = list.select{ |record| :five == record[:endtime_group] }.count
     six = list.select{ |record| :six == record[:endtime_group] }.count
-    seven = list.select{ |record| :seven == record[:endtime_group] }.count
+    #seven = list.select{ |record| :seven == record[:endtime_group] }.count
     rest = list.count - (one+two+three+four+five+six)
 
 
@@ -38,7 +38,7 @@ class FormerEmployeeMailNotification < Thor
     puts "Vier Monate:  #{four}"
     puts "Fünf Monate:  #{five}"
     puts "Sechs Monate: #{six}"
-    puts "Sieben oder mehr Monate: #{seven}"
+    puts "Sieben oder mehr Monate: #{rest}"
   end
 
 private 
@@ -72,14 +72,14 @@ private
   def to_hash list
     list.inject([]) do |new_list, array|
       new_list.push(
-       {uid: array[3],
-        mail: array[4],
-        firstname: array[1],
-        lastname: array[0],
-        gender: array[2],
+       {uid: array[9],
+        mail: array[2],
+        firstname: array[0],
+        lastname: array[1],
+        gender: array[5].to_i,
         #title: array[5],
-        endtime: make_date(array[5]),
-        endtime_group: select_endtime_group(make_date(array[5]))}
+        endtime: make_date(array[4]),
+        endtime_group: select_endtime_group(make_date(array[4]))}
       )
     end
   end
